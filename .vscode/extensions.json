@@ -1,0 +1,11 @@
+{
+  "recommendations": [
+    "ms-dotnettools.csdevkit",
+    "ms-dotnettools.csharp",
+    "ms-dotnettools.upgrade-agent",
+    "ms-vscode.powershell"
+  ],
+  "unwantedRecommendations": [
+    "ms-dotnettools.vscode-dotnet-modernize"
+  ]
+}

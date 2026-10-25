@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewBag.Title - Tax App</title>
+    @Styles.Render("~/Content/css")
+</head>
+<body>
+    <header class="site-header">
+        <div class="container header-row">
+            <a class="brand" href="@Url.Action("Index", "Home")" data-testid="app-title">Tax App</a>
+            <nav class="nav">
+                @Html.ActionLink("Tax estimator", "Estimate", "Tax")
+                @Html.ActionLink("Deductions", "Index", "Deductions")
+                @Html.ActionLink("Return summary", "Index", "Return")
+                @Html.ActionLink("GST calculator", "Index", "Gst")
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        @RenderBody()
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p data-testid="disclaimer">
+                Fictional demo app. Estimates use published ATO resident tax rates in a simplified way (no offsets, no
+                Medicare levy thresholds, no HELP). Not tax advice and not an ATO service.
+            </p>
+            <p class="runtime" data-testid="runtime">Running on @RuntimeInfo.Description</p>
+        </div>
+    </footer>
+
+    @Scripts.Render("~/bundles/site")
+    @RenderSection("scripts", required: false)
+</body>
+</html>

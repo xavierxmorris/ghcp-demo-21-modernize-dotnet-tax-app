@@ -1,0 +1,23 @@
+[
+  {
+    "Id": "3f2b8c1e-6b1a-4c7e-9d11-0a5e2c7b1001",
+    "Description": "Work laptop (work-use portion)",
+    "Category": "ToolsAndEquipment",
+    "Amount": 1320.00,
+    "AddedUtc": "2026-07-01T00:00:00Z"
+  },
+  {
+    "Id": "3f2b8c1e-6b1a-4c7e-9d11-0a5e2c7b1002",
+    "Description": "Home office running costs",
+    "Category": "HomeOffice",
+    "Amount": 780.50,
+    "AddedUtc": "2026-07-02T00:00:00Z"
+  },
+  {
+    "Id": "3f2b8c1e-6b1a-4c7e-9d11-0a5e2c7b1003",
+    "Description": "Donation to a registered charity",
+    "Category": "GiftsAndDonations",
+    "Amount": 150.00,
+    "AddedUtc": "2026-07-03T00:00:00Z"
+  }
+]

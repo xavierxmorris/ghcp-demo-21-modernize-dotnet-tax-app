@@ -1,0 +1,20 @@
+# Build output
+bin/
+obj/
+artifacts/
+TestResults/
+*.user
+*.suo
+.vs/
+
+# Runtime state written by the Tax App while you click around (the committed seed is deductions.seed.json)
+**/App_Data/deductions.json
+**/App_Data/logs/
+
+# Disposable demo workspace marker and local captures
+.taxapp-demo-workspace
+*.log
+
+# OS / editor noise
+Thumbs.db
+.DS_Store

@@ -1,0 +1,57 @@
+@model TaxApp.Web.Models.ReturnViewModel
+@{
+    ViewBag.Title = "Return summary";
+}
+
+<h1>Return summary</h1>
+<p class="lead">Combine your income, your saved deductions and the tax already withheld to see a refund or an amount payable.</p>
+
+@using (Html.BeginForm("Index", "Return", FormMethod.Get, new { @class = "card form" }))
+{
+    if (!ViewData.ModelState.IsValid)
+    {
+        <div class="validation" data-testid="validation-summary">
+            @Html.ValidationSummary(false)
+        </div>
+    }
+
+    <label for="TaxYear">Tax year</label>
+    @Html.DropDownList("TaxYear", Model.TaxYears)
+
+    <label for="Income">Gross income ($)</label>
+    @Html.TextBox("Income", Model.Request.Income, new { type = "number", step = "0.01", min = "0" })
+
+    <label for="Withheld">Tax withheld by your employer ($)</label>
+    @Html.TextBox("Withheld", Model.Request.Withheld, new { type = "number", step = "0.01", min = "0" })
+
+    <button type="submit" class="btn">Summarise</button>
+}
+
+@if (Model.Summary != null)
+{
+    var s = Model.Summary;
+    var e = s.Estimate;
+    <section class="card results" data-testid="results">
+        <h2>Return for @e.TaxYear</h2>
+        <dl class="figures">
+            <dt>Gross income</dt>
+            <dd data-testid="rs-income" data-value="@MoneyFormatter.Raw(e.Income)">@MoneyFormatter.Display(e.Income)</dd>
+            <dt>Deductions (from your saved list)</dt>
+            <dd data-testid="rs-deductions" data-value="@MoneyFormatter.Raw(e.Deductions)">@MoneyFormatter.Display(e.Deductions)</dd>
+            <dt>Taxable income</dt>
+            <dd data-testid="rs-taxable-income" data-value="@MoneyFormatter.Raw(e.TaxableIncome)">@MoneyFormatter.Display(e.TaxableIncome)</dd>
+            <dt>Income tax</dt>
+            <dd data-testid="rs-income-tax" data-value="@MoneyFormatter.Raw(e.IncomeTax)">@MoneyFormatter.Display(e.IncomeTax)</dd>
+            <dt>Medicare levy</dt>
+            <dd data-testid="rs-medicare-levy" data-value="@MoneyFormatter.Raw(e.MedicareLevy)">@MoneyFormatter.Display(e.MedicareLevy)</dd>
+            <dt class="total">Total tax</dt>
+            <dd class="total" data-testid="rs-total-tax" data-value="@MoneyFormatter.Raw(e.TotalTax)">@MoneyFormatter.Display(e.TotalTax)</dd>
+            <dt>Tax withheld</dt>
+            <dd data-testid="rs-withheld" data-value="@MoneyFormatter.Raw(s.Withheld)">@MoneyFormatter.Display(s.Withheld)</dd>
+        </dl>
+        <p class="outcome @(s.IsRefund ? "refund" : "payable")">
+            <span data-testid="rs-result">@(s.IsRefund ? "Refund" : "Payable")</span>:
+            <strong data-testid="rs-result-amount" data-value="@MoneyFormatter.Raw(s.ResultAmount)">@MoneyFormatter.Display(s.ResultAmount)</strong>
+        </p>
+    </section>
+}

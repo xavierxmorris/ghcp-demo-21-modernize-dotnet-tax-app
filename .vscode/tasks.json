@@ -1,0 +1,169 @@
+{
+  "version": "2.0.0",
+  "inputs": [
+    {
+      "id": "baseUrl",
+      "type": "promptString",
+      "description": "Base URL of a running Tax App (legacy: http://localhost:8081, modern: http://localhost:5081)",
+      "default": "http://localhost:8081"
+    }
+  ],
+  "tasks": [
+    {
+      "label": "build: all",
+      "dependsOn": ["legacy: build", "modern: build"],
+      "dependsOrder": "sequence",
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "test: all",
+      "dependsOn": ["legacy: test", "modern: test"],
+      "dependsOrder": "sequence",
+      "group": { "kind": "test", "isDefault": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "legacy: build",
+      "type": "process",
+      "command": "dotnet",
+      "args": ["build", "${workspaceFolder}/legacy/TaxApp.sln", "-nologo", "-v:minimal"],
+      "group": "build",
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "legacy: build host",
+      "type": "process",
+      "command": "dotnet",
+      "args": ["build", "${workspaceFolder}/tools/LegacyHost/LegacyHost.csproj", "-nologo", "-v:minimal"],
+      "group": "build",
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "legacy: build all",
+      "dependsOn": ["legacy: build", "legacy: build host"],
+      "dependsOrder": "sequence",
+      "problemMatcher": []
+    },
+    {
+      "label": "legacy: test",
+      "type": "process",
+      "command": "dotnet",
+      "args": ["test", "${workspaceFolder}/legacy/TaxApp.sln", "-nologo", "-v:minimal"],
+      "group": "test",
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "legacy: run site",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "run",
+        "--project", "${workspaceFolder}/tools/LegacyHost",
+        "--",
+        "--site", "${workspaceFolder}/legacy/TaxApp.Web",
+        "--port", "8081"
+      ],
+      "dependsOn": ["legacy: build"],
+      "isBackground": true,
+      "presentation": { "reveal": "always", "panel": "dedicated" },
+      "problemMatcher": {
+        "owner": "taxapp-legacy",
+        "pattern": { "regexp": "^(error|warning): (.*)$", "severity": 1, "message": 2 },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^Tax App \\(legacy",
+          "endsPattern": "listening on http://localhost:"
+        }
+      }
+    },
+    {
+      "label": "modern: build",
+      "type": "process",
+      "command": "dotnet",
+      "args": ["build", "${workspaceFolder}/modern/TaxApp.sln", "-nologo", "-v:minimal"],
+      "group": "build",
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "modern: test",
+      "type": "process",
+      "command": "dotnet",
+      "args": ["test", "${workspaceFolder}/modern/TaxApp.sln", "-nologo", "-v:minimal"],
+      "group": "test",
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "modern: run site",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "run",
+        "--project", "${workspaceFolder}/modern/TaxApp.Web",
+        "--no-launch-profile",
+        "--urls", "http://localhost:5081"
+      ],
+      "options": { "env": { "ASPNETCORE_ENVIRONMENT": "Development" } },
+      "isBackground": true,
+      "presentation": { "reveal": "always", "panel": "dedicated" },
+      "problemMatcher": {
+        "owner": "taxapp-modern",
+        "pattern": { "regexp": "^(error|warn): (.*)$", "severity": 1, "message": 2 },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^(info|Building)",
+          "endsPattern": "Now listening on: http://localhost:"
+        }
+      }
+    },
+    {
+      "label": "golden: verify vectors",
+      "type": "process",
+      "command": "python",
+      "args": ["${workspaceFolder}/scripts/golden/new_tax_vectors.py", "--check"],
+      "problemMatcher": []
+    },
+    {
+      "label": "contract: run against a running site",
+      "type": "process",
+      "command": "pwsh",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/Invoke-TaxContract.ps1", "-BaseUrl", "${input:baseUrl}", "-Label", "site"],
+      "problemMatcher": []
+    },
+    {
+      "label": "demo: check everything",
+      "type": "process",
+      "command": "pwsh",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}/go.ps1", "-Check"],
+      "problemMatcher": []
+    },
+    {
+      "label": "demo: reset disposable workspace and open VS Code",
+      "type": "process",
+      "command": "pwsh",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}/go.ps1", "-Reset"],
+      "problemMatcher": []
+    },
+    {
+      "label": "demo: compare upgraded workspace",
+      "type": "process",
+      "command": "pwsh",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}/go.ps1", "-Compare"],
+      "problemMatcher": []
+    },
+    {
+      "label": "demo: open legacy site in browser",
+      "type": "process",
+      "command": "pwsh",
+      "args": ["-NoProfile", "-Command", "Start-Process http://localhost:8081"],
+      "problemMatcher": []
+    },
+    {
+      "label": "demo: open modern site in browser",
+      "type": "process",
+      "command": "pwsh",
+      "args": ["-NoProfile", "-Command", "Start-Process http://localhost:5081"],
+      "problemMatcher": []
+    }
+  ]
+}

@@ -1,0 +1,414 @@
+{
+  "description": "Golden master for the Tax App. Expected values come from an independent reference calculation, not from the application code. Do not hand-edit; regenerate with scripts/golden/new_tax_vectors.py.",
+  "source": {
+    "ratesUrl": "https://www.ato.gov.au/tax-rates-and-codes/tax-rates-australian-residents",
+    "retrieved": "2026-10-26",
+    "medicareLevyRate": "0.02",
+    "gstRate": "0.10",
+    "rounding": "2 decimal places, midpoint away from zero",
+    "generator": "scripts/golden/new_tax_vectors.py",
+    "disclaimer": "Illustrative only. Not tax advice and not an ATO service."
+  },
+  "estimate": [
+    {
+      "name": "zero income",
+      "taxYear": "2026-27",
+      "income": "0.00",
+      "deductions": "0.00",
+      "expected": {
+        "taxableIncome": "0.00",
+        "incomeTax": "0.00",
+        "medicareLevy": "0.00",
+        "totalTax": "0.00",
+        "netIncome": "0.00",
+        "effectiveRate": "0.00"
+      }
+    },
+    {
+      "name": "at the tax-free threshold",
+      "taxYear": "2026-27",
+      "income": "18200.00",
+      "deductions": "0.00",
+      "expected": {
+        "taxableIncome": "18200.00",
+        "incomeTax": "0.00",
+        "medicareLevy": "364.00",
+        "totalTax": "364.00",
+        "netIncome": "17836.00",
+        "effectiveRate": "2.00"
+      }
+    },
+    {
+      "name": "one dollar over the threshold",
+      "taxYear": "2026-27",
+      "income": "18201.00",
+      "deductions": "0.00",
+      "expected": {
+        "taxableIncome": "18201.00",
+        "incomeTax": "0.15",
+        "medicareLevy": "364.02",
+        "totalTax": "364.17",
+        "netIncome": "17836.83",
+        "effectiveRate": "2.00"
+      }
+    },
+    {
+      "name": "low income",
+      "taxYear": "2026-27",
+      "income": "30000.00",
+      "deductions": "0.00",
+      "expected": {
+        "taxableIncome": "30000.00",
+        "incomeTax": "1770.00",
+        "medicareLevy": "600.00",
+        "totalTax": "2370.00",
+        "netIncome": "27630.00",
+        "effectiveRate": "7.90"
+      }
+    },
+    {
+      "name": "top of the 15% band",
+      "taxYear": "2026-27",
+      "income": "45000.00",
+      "deductions": "0.00",
+      "expected": {
+        "taxableIncome": "45000.00",
+        "incomeTax": "4020.00",
+        "medicareLevy": "900.00",
+        "totalTax": "4920.00",
+        "netIncome": "40080.00",
+        "effectiveRate": "10.93"
+      }
+    },
+    {
+      "name": "middle income",
+      "taxYear": "2026-27",
+      "income": "95000.00",
+      "deductions": "0.00",
+      "expected": {
+        "taxableIncome": "95000.00",
+        "incomeTax": "19020.00",
+        "medicareLevy": "1900.00",
+        "totalTax": "20920.00",
+        "netIncome": "74080.00",
+        "effectiveRate": "22.02"
+      }
+    },
+    {
+      "name": "top of the 30% band",
+      "taxYear": "2026-27",
+      "income": "135000.00",
+      "deductions": "0.00",
+      "expected": {
+        "taxableIncome": "135000.00",
+        "incomeTax": "31020.00",
+        "medicareLevy": "2700.00",
+        "totalTax": "33720.00",
+        "netIncome": "101280.00",
+        "effectiveRate": "24.98"
+      }
+    },
+    {
+      "name": "top of the 37% band",
+      "taxYear": "2026-27",
+      "income": "190000.00",
+      "deductions": "0.00",
+      "expected": {
+        "taxableIncome": "190000.00",
+        "incomeTax": "51370.00",
+        "medicareLevy": "3800.00",
+        "totalTax": "55170.00",
+        "netIncome": "134830.00",
+        "effectiveRate": "29.04"
+      }
+    },
+    {
+      "name": "high income",
+      "taxYear": "2026-27",
+      "income": "250000.00",
+      "deductions": "0.00",
+      "expected": {
+        "taxableIncome": "250000.00",
+        "incomeTax": "78370.00",
+        "medicareLevy": "5000.00",
+        "totalTax": "83370.00",
+        "netIncome": "166630.00",
+        "effectiveRate": "33.35"
+      }
+    },
+    {
+      "name": "middle income with deductions",
+      "taxYear": "2026-27",
+      "income": "95000.00",
+      "deductions": "5000.00",
+      "expected": {
+        "taxableIncome": "90000.00",
+        "incomeTax": "17520.00",
+        "medicareLevy": "1800.00",
+        "totalTax": "19320.00",
+        "netIncome": "75680.00",
+        "effectiveRate": "20.34"
+      }
+    },
+    {
+      "name": "deductions larger than income",
+      "taxYear": "2026-27",
+      "income": "20000.00",
+      "deductions": "25000.00",
+      "expected": {
+        "taxableIncome": "0.00",
+        "incomeTax": "0.00",
+        "medicareLevy": "0.00",
+        "totalTax": "0.00",
+        "netIncome": "20000.00",
+        "effectiveRate": "0.00"
+      }
+    },
+    {
+      "name": "rounding: income tax .045 rounds up",
+      "taxYear": "2026-27",
+      "income": "18200.30",
+      "deductions": "0.00",
+      "expected": {
+        "taxableIncome": "18200.30",
+        "incomeTax": "0.05",
+        "medicareLevy": "364.01",
+        "totalTax": "364.06",
+        "netIncome": "17836.24",
+        "effectiveRate": "2.00"
+      }
+    },
+    {
+      "name": "rounding: Medicare levy .905 rounds up",
+      "taxYear": "2026-27",
+      "income": "12345.25",
+      "deductions": "0.00",
+      "expected": {
+        "taxableIncome": "12345.25",
+        "incomeTax": "0.00",
+        "medicareLevy": "246.91",
+        "totalTax": "246.91",
+        "netIncome": "12098.34",
+        "effectiveRate": "2.00"
+      }
+    },
+    {
+      "name": "cents in income",
+      "taxYear": "2026-27",
+      "income": "87654.32",
+      "deductions": "1234.56",
+      "expected": {
+        "taxableIncome": "86419.76",
+        "incomeTax": "16445.93",
+        "medicareLevy": "1728.40",
+        "totalTax": "18174.33",
+        "netIncome": "69479.99",
+        "effectiveRate": "20.73"
+      }
+    },
+    {
+      "name": "2025-26 just over the threshold",
+      "taxYear": "2025-26",
+      "income": "18201.00",
+      "deductions": "0.00",
+      "expected": {
+        "taxableIncome": "18201.00",
+        "incomeTax": "0.16",
+        "medicareLevy": "364.02",
+        "totalTax": "364.18",
+        "netIncome": "17836.82",
+        "effectiveRate": "2.00"
+      }
+    },
+    {
+      "name": "2025-26 top of the lowest taxed band",
+      "taxYear": "2025-26",
+      "income": "45000.00",
+      "deductions": "0.00",
+      "expected": {
+        "taxableIncome": "45000.00",
+        "incomeTax": "4288.00",
+        "medicareLevy": "900.00",
+        "totalTax": "5188.00",
+        "netIncome": "39812.00",
+        "effectiveRate": "11.53"
+      }
+    },
+    {
+      "name": "2025-26 middle income",
+      "taxYear": "2025-26",
+      "income": "95000.00",
+      "deductions": "0.00",
+      "expected": {
+        "taxableIncome": "95000.00",
+        "incomeTax": "19288.00",
+        "medicareLevy": "1900.00",
+        "totalTax": "21188.00",
+        "netIncome": "73812.00",
+        "effectiveRate": "22.30"
+      }
+    },
+    {
+      "name": "2025-26 top of the 37% band",
+      "taxYear": "2025-26",
+      "income": "190000.00",
+      "deductions": "0.00",
+      "expected": {
+        "taxableIncome": "190000.00",
+        "incomeTax": "51638.00",
+        "medicareLevy": "3800.00",
+        "totalTax": "55438.00",
+        "netIncome": "134562.00",
+        "effectiveRate": "29.18"
+      }
+    },
+    {
+      "name": "2025-26 high income with deductions",
+      "taxYear": "2025-26",
+      "income": "210000.00",
+      "deductions": "10000.00",
+      "expected": {
+        "taxableIncome": "200000.00",
+        "incomeTax": "56138.00",
+        "medicareLevy": "4000.00",
+        "totalTax": "60138.00",
+        "netIncome": "149862.00",
+        "effectiveRate": "28.64"
+      }
+    }
+  ],
+  "gst": [
+    {
+      "name": "add GST to a round price",
+      "mode": "AddGst",
+      "amount": "100.00",
+      "expected": {
+        "gstAmount": "10.00",
+        "amountExclGst": "100.00",
+        "amountInclGst": "110.00"
+      }
+    },
+    {
+      "name": "extract GST from a round price",
+      "mode": "ExtractGst",
+      "amount": "110.00",
+      "expected": {
+        "gstAmount": "10.00",
+        "amountExclGst": "100.00",
+        "amountInclGst": "110.00"
+      }
+    },
+    {
+      "name": "add GST, rounds up",
+      "mode": "AddGst",
+      "amount": "19.99",
+      "expected": {
+        "gstAmount": "2.00",
+        "amountExclGst": "19.99",
+        "amountInclGst": "21.99"
+      }
+    },
+    {
+      "name": "extract GST, rounds down",
+      "mode": "ExtractGst",
+      "amount": "19.99",
+      "expected": {
+        "gstAmount": "1.82",
+        "amountExclGst": "18.17",
+        "amountInclGst": "19.99"
+      }
+    },
+    {
+      "name": "rounding: add GST .005 rounds up",
+      "mode": "AddGst",
+      "amount": "0.05",
+      "expected": {
+        "gstAmount": "0.01",
+        "amountExclGst": "0.05",
+        "amountInclGst": "0.06"
+      }
+    },
+    {
+      "name": "zero amount",
+      "mode": "ExtractGst",
+      "amount": "0.00",
+      "expected": {
+        "gstAmount": "0.00",
+        "amountExclGst": "0.00",
+        "amountInclGst": "0.00"
+      }
+    },
+    {
+      "name": "large amount",
+      "mode": "AddGst",
+      "amount": "1234567.89",
+      "expected": {
+        "gstAmount": "123456.79",
+        "amountExclGst": "1234567.89",
+        "amountInclGst": "1358024.68"
+      }
+    }
+  ],
+  "return": [
+    {
+      "name": "refund with deductions",
+      "taxYear": "2026-27",
+      "income": "95000.00",
+      "deductionsTotal": "5000.00",
+      "withheld": "20000.00",
+      "expected": {
+        "totalTax": "19320.00",
+        "isRefund": true,
+        "resultAmount": "680.00"
+      }
+    },
+    {
+      "name": "amount payable",
+      "taxYear": "2026-27",
+      "income": "95000.00",
+      "deductionsTotal": "0.00",
+      "withheld": "18000.00",
+      "expected": {
+        "totalTax": "20920.00",
+        "isRefund": false,
+        "resultAmount": "2920.00"
+      }
+    },
+    {
+      "name": "below threshold, Medicare only",
+      "taxYear": "2026-27",
+      "income": "18000.00",
+      "deductionsTotal": "0.00",
+      "withheld": "0.00",
+      "expected": {
+        "totalTax": "360.00",
+        "isRefund": false,
+        "resultAmount": "360.00"
+      }
+    },
+    {
+      "name": "2025-26 with seeded deductions",
+      "taxYear": "2025-26",
+      "income": "60000.00",
+      "deductionsTotal": "2250.50",
+      "withheld": "10000.00",
+      "expected": {
+        "totalTax": "9267.84",
+        "isRefund": true,
+        "resultAmount": "732.16"
+      }
+    },
+    {
+      "name": "withheld exactly equals tax",
+      "taxYear": "2026-27",
+      "income": "95000.00",
+      "deductionsTotal": "0.00",
+      "withheld": "20920.00",
+      "expected": {
+        "totalTax": "20920.00",
+        "isRefund": true,
+        "resultAmount": "0.00"
+      }
+    }
+  ]
+}

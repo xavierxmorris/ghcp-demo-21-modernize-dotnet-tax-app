@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Dev-only host for the LEGACY Tax App. It runs the real ASP.NET (System.Web) pipeline inside this process and bridges
+    HttpListener to it, so the .NET Framework app can run from VS Code or a terminal without IIS Express or admin rights.
+    It is a demo convenience, not a production web server, and it is not part of the app that gets modernized.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <RootNamespace>LegacyHost</RootNamespace>
+    <AssemblyName>TaxApp.LegacyHost</AssemblyName>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Web" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+  </ItemGroup>
+
+</Project>

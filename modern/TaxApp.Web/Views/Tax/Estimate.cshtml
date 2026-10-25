@@ -1,0 +1,56 @@
+@model TaxEstimateViewModel
+@{
+    ViewBag.Title = "Tax estimator";
+}
+
+<h1>Tax estimator</h1>
+<p class="lead">Estimate income tax and Medicare levy for an Australian resident individual. Illustrative only.</p>
+
+@using (Html.BeginForm("Estimate", "Tax", FormMethod.Get, new { @class = "card form" }))
+{
+    if (!ViewData.ModelState.IsValid)
+    {
+        <div class="validation" data-testid="validation-summary">
+            @Html.ValidationSummary(false)
+        </div>
+    }
+
+    <label for="TaxYear">Tax year</label>
+    @Html.DropDownList("TaxYear", Model.TaxYears)
+
+    <label for="Income">Gross income ($)</label>
+    @Html.TextBox("Income", Model.Request.Income, new { type = "number", step = "0.01", min = "0" })
+
+    <label for="Deductions">Deductions ($)</label>
+    @Html.TextBox("Deductions", Model.Request.Deductions, new { type = "number", step = "0.01", min = "0" })
+
+    <button type="submit" class="btn">Estimate</button>
+    <p class="quick" data-quick-estimate="@Url.Action("EstimateJson", "Tax")">
+        <span class="muted">Live preview:</span> <strong data-quick-result>enter an income above</strong>
+    </p>
+}
+
+@if (Model.Result is { } r)
+{
+    <section class="card results" data-testid="results">
+        <h2>Estimate for @r.TaxYear</h2>
+        <dl class="figures">
+            <dt>Gross income</dt>
+            <dd data-testid="income" data-value="@MoneyFormatter.Raw(r.Income)">@MoneyFormatter.Display(r.Income)</dd>
+            <dt>Deductions</dt>
+            <dd data-testid="deductions" data-value="@MoneyFormatter.Raw(r.Deductions)">@MoneyFormatter.Display(r.Deductions)</dd>
+            <dt>Taxable income</dt>
+            <dd data-testid="taxable-income" data-value="@MoneyFormatter.Raw(r.TaxableIncome)">@MoneyFormatter.Display(r.TaxableIncome)</dd>
+            <dt>Income tax</dt>
+            <dd data-testid="income-tax" data-value="@MoneyFormatter.Raw(r.IncomeTax)">@MoneyFormatter.Display(r.IncomeTax)</dd>
+            <dt>Medicare levy (2%)</dt>
+            <dd data-testid="medicare-levy" data-value="@MoneyFormatter.Raw(r.MedicareLevy)">@MoneyFormatter.Display(r.MedicareLevy)</dd>
+            <dt class="total">Total tax</dt>
+            <dd class="total" data-testid="total-tax" data-value="@MoneyFormatter.Raw(r.TotalTax)">@MoneyFormatter.Display(r.TotalTax)</dd>
+            <dt>Income after tax</dt>
+            <dd data-testid="net-income" data-value="@MoneyFormatter.Raw(r.NetIncome)">@MoneyFormatter.Display(r.NetIncome)</dd>
+            <dt>Effective tax rate</dt>
+            <dd data-testid="effective-rate" data-value="@MoneyFormatter.Raw(r.EffectiveRate)">@MoneyFormatter.Percent(r.EffectiveRate)</dd>
+        </dl>
+    </section>
+}

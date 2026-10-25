@@ -1,0 +1,7 @@
+bin/
+obj/
+.vs/
+TestResults/
+**/App_Data/deductions.json
+**/App_Data/logs/
+.taxapp-demo-workspace

@@ -1,0 +1,36 @@
+@model TaxApp.Web.Models.HomeViewModel
+@{
+    ViewBag.Title = "Home";
+}
+
+<section class="hero">
+    <h1>Tax App</h1>
+    <p class="lead">
+        Estimate your tax, track deductions and see whether you are heading for a refund.
+        A small ASP.NET MVC 5 application on .NET Framework 4.8, used to demonstrate GitHub Copilot modernization.
+    </p>
+</section>
+
+<section class="grid">
+    <a class="card tile" href="@Url.Action("Estimate", "Tax")">
+        <h2>Tax estimator</h2>
+        <p>Income tax and Medicare levy for an Australian resident individual.</p>
+    </a>
+    <a class="card tile" href="@Url.Action("Index", "Deductions")">
+        <h2>Deductions</h2>
+        <p>Keep a list of work-related deductions and see the running total.</p>
+    </a>
+    <a class="card tile" href="@Url.Action("Index", "Return")">
+        <h2>Return summary</h2>
+        <p>Combine income, deductions and tax withheld into a refund or amount payable.</p>
+    </a>
+    <a class="card tile" href="@Url.Action("Index", "Gst")">
+        <h2>GST calculator</h2>
+        <p>Add GST to a price or extract the GST from a GST-inclusive price.</p>
+    </a>
+</section>
+
+<p class="muted" data-testid="tax-years">
+    Supported tax years: @(string.Join(", ", Model.SupportedTaxYears)).
+    Default: <strong data-testid="default-tax-year">@Model.DefaultTaxYear</strong>.
+</p>

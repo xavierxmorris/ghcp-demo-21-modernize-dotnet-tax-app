@@ -1,0 +1,34 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Modern Tax App (.NET 10)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "modern: build",
+      "program": "${workspaceFolder}/modern/TaxApp.Web/bin/Debug/net10.0/TaxApp.Web.dll",
+      "args": ["--urls", "http://localhost:5081"],
+      "cwd": "${workspaceFolder}/modern/TaxApp.Web",
+      "env": { "ASPNETCORE_ENVIRONMENT": "Development" },
+      "console": "internalConsole",
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+      }
+    },
+    {
+      "name": "Legacy Tax App (.NET Framework 4.8 via LegacyHost) - experimental",
+      "type": "clr",
+      "request": "launch",
+      "preLaunchTask": "legacy: build all",
+      "program": "${workspaceFolder}/tools/LegacyHost/bin/Debug/net48/TaxApp.LegacyHost.exe",
+      "args": ["--site", "${workspaceFolder}/legacy/TaxApp.Web", "--port", "8081"],
+      "cwd": "${workspaceFolder}",
+      "console": "internalConsole",
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "listening on (http://localhost:\\d+/?)"
+      }
+    }
+  ]
+}

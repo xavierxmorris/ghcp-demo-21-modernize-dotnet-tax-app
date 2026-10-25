@@ -1,0 +1,40 @@
+@model GstViewModel
+@{
+    ViewBag.Title = "GST calculator";
+}
+
+<h1>GST calculator</h1>
+<p class="lead">Add GST to a price, or extract the GST from a GST-inclusive price.</p>
+
+@using (Html.BeginForm("Index", "Gst", FormMethod.Get, new { @class = "card form" }))
+{
+    if (!ViewData.ModelState.IsValid)
+    {
+        <div class="validation" data-testid="validation-summary">
+            @Html.ValidationSummary(false)
+        </div>
+    }
+
+    <label for="Amount">Amount ($)</label>
+    @Html.TextBox("Amount", Model.Request.Amount, new { type = "number", step = "0.01", min = "0" })
+
+    <label for="Mode">Calculation</label>
+    @Html.DropDownList("Mode", Model.Modes)
+
+    <button type="submit" class="btn">Calculate</button>
+}
+
+@if (Model.Result is { } r)
+{
+    <section class="card results" data-testid="results">
+        <h2>@EnumDisplay.Name(r.Mode)</h2>
+        <dl class="figures">
+            <dt>Price excluding GST</dt>
+            <dd data-testid="amount-excl-gst" data-value="@MoneyFormatter.Raw(r.AmountExclGst)">@MoneyFormatter.Display(r.AmountExclGst)</dd>
+            <dt>GST</dt>
+            <dd data-testid="gst-amount" data-value="@MoneyFormatter.Raw(r.GstAmount)">@MoneyFormatter.Display(r.GstAmount)</dd>
+            <dt class="total">Price including GST</dt>
+            <dd class="total" data-testid="amount-incl-gst" data-value="@MoneyFormatter.Raw(r.AmountInclGst)">@MoneyFormatter.Display(r.AmountInclGst)</dd>
+        </dl>
+    </section>
+}
