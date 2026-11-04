@@ -124,6 +124,13 @@
       "problemMatcher": []
     },
     {
+      "label": "security: verify assessment samples",
+      "type": "process",
+      "command": "pwsh",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/Test-SecurityAssessmentFixtures.ps1"],
+      "problemMatcher": []
+    },
+    {
       "label": "contract: run against a running site",
       "type": "process",
       "command": "pwsh",

@@ -28,6 +28,26 @@ What a good assessment of `legacy/TaxApp.Web` should surface, and what the preba
 | 16 | `Models/*.cs` | No nullable reference types, DataAnnotations `[Range]` | ASP.NET Core treats non-nullable reference types as required by default | `SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true` | Watch validation messages |
 | 17 | `Helpers/MoneyFormatter.cs` | `new CultureInfo("en-AU")` and `decimal` formatting | Culture data can differ by runtime or ICU | Kept; machine checks read culture-neutral `data-value` attributes | Usually fine |
 | 18 | `Content/`, `Scripts/`, `App_Data/` | Static folders next to the code | Learn describes the *Upgrading MVC static files* skill as moving `Content/`, `Scripts/` **and `App_Data/`** into `wwwroot/`. Everything under `wwwroot` is served publicly, so moving `App_Data` would publish the deductions file | `Content` and `Scripts` become `wwwroot/css` and `wwwroot/js`; `App_Data` stays outside `wwwroot` | **Watch this one**: the contract checks `/App_Data/…` is not served |
+| 19 | `TaxApp.Web.csproj` | `System.Data.SqlClient` 4.8.5, used only by assessment code | The NuGet audit can report a direct-package advisory reliably | No equivalent sample dependency | Report, replace or remove |
+| 20 | `Helpers/SecurityAssessmentSamples.cs` | Private `BinaryFormatter.Deserialize` sample with request-shaped input | Demonstrates unsafe deserialization (CWE-502) without a caller or route | No equivalent sample | Identify and replace/delete |
+| 21 | `Helpers/SecurityAssessmentSamples.cs` | Private XML parser with DTD processing and `XmlUrlResolver` enabled | Demonstrates XXE exposure (CWE-611) | No equivalent sample | Disable external entities |
+| 22 | `Helpers/SecurityAssessmentSamples.cs` | Private `SqlCommand` built by request-value string concatenation | Demonstrates SQL injection (CWE-89) without a real database | No equivalent sample | Parameterize or remove |
+| 23 | `Helpers/SecurityAssessmentSamples.cs` | Private `HtmlString` return containing a request value | Demonstrates an unencoded HTML/reflected-XSS sink (CWE-79) | No equivalent sample | Encode or remove |
+| 24 | `Helpers/SecurityAssessmentSamples.cs` | Private `Path.Combine` and `File.ReadAllText` with a request value | Demonstrates path traversal (CWE-22) without a caller | No equivalent sample | Validate an allowed canonical path or remove |
+| 25 | `Helpers/SecurityAssessmentSamples.cs` | SHA-1 used for password hashing | Demonstrates weak cryptography (CWE-327) | No equivalent sample | Use a modern password-hashing strategy |
+| 26 | `Helpers/SecurityAssessmentSamples.cs` | `Random` used for a security token | Demonstrates predictable random values (CWE-338) | No equivalent sample | Use a cryptographic random source |
+| 27 | `Helpers/SecurityAssessmentSamples.cs` | Cookie created with `Secure` and `HttpOnly` false | Demonstrates missing browser security flags (CWE-614/CWE-1004) | No equivalent sample | Set the flags correctly or remove |
+| 28 | `Web.config`, `Helpers/SecurityAssessmentSamples.cs` | Unused `SecurityDemoPassword` with a conspicuous fake value | Demonstrates hard-coded credential scanning (CWE-259/CWE-798) without a real secret | No equivalent setting | Remove it and put real credentials in a secret store |
+
+Rows 19-28 are synthetic assessment debt compiled into the legacy web project. Their inputs are request-shaped to be easy for an
+assessment to understand, but the helper class is internal, every method is private, no controller calls it, and no real
+credential, connection or data exists. `./scripts/Test-SecurityAssessmentFixtures.ps1` proves those constraints and verifies
+that NuGet audit reports the direct package. The upgrade agent should list, plan and remediate them; never make the samples callable
+or deploy this legacy demo as a production application.
+
+The direct-package finding is verified by NuGet audit. The eight code samples use recognizable source-to-sink patterns, but exact
+CWE rule coverage depends on the installed assessment engine and model; the live prompt explicitly requires direct review of the
+sample file so those findings are still part of the assessment and plan.
 
 ## Things that must not change (the contract)
 

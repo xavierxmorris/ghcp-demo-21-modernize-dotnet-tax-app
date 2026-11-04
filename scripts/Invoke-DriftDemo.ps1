@@ -41,8 +41,17 @@ try {
     Set-Content -LiteralPath $program -Value $camel -NoNewline -Encoding utf8
     Write-Host 'Seeded: round-to-even in TaxCalculator, camelCase JSON in Program.cs' -ForegroundColor Yellow
 
-    & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'Compare-Workspace.ps1') -Target (Join-Path $scratch 'modern\TaxApp.sln') | Out-Host
-    $detected = ($LASTEXITCODE -ne 0)
+    $assessmentArtifact = Join-Path $scratch 'modern\.github\upgrades\assessment\assessment.json'
+    New-Item -ItemType Directory -Force (Split-Path $assessmentArtifact) | Out-Null
+    Set-Content -LiteralPath $assessmentArtifact -Value '{"finding":"BinaryFormatter","package":"System.Data.SqlClient 4.8.5"}' -NoNewline -Encoding utf8
+
+    $comparison = & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'Compare-Workspace.ps1') -Target (Join-Path $scratch 'modern\TaxApp.sln') 2>&1
+    $comparisonExit = $LASTEXITCODE
+    $comparison | Out-Host
+    if (@($comparison | Where-Object { $_ -match 'security remediation OK' }).Count -ne 1) {
+        throw 'Compare-Workspace.ps1 failed to ignore assessment artifacts or otherwise reported a security false positive.'
+    }
+    $detected = ($comparisonExit -ne 0)
 }
 finally {
     if (-not $Keep -and (Test-Path -LiteralPath $scratch)) { Remove-Item -LiteralPath $scratch -Recurse -Force -ErrorAction SilentlyContinue }

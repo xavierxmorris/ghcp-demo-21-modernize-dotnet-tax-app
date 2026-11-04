@@ -8,8 +8,8 @@
     outside this repository, never in the repository itself.
 
     The workspace contains what a real team's repository would: the solution, the web app, the tests, a short
-    copilot-instructions.md and the tax-money-rules skill. It does NOT contain the prebaked modern app, the HTTP contract or
-    the legacy host, so the agent sees only the code it is meant to upgrade.
+    copilot-instructions.md, the tax-money-rules skill and intentional private security debt for the assessment. It does NOT
+    contain the prebaked modern app, the HTTP contract or the legacy host, so the agent sees only the code it is meant to upgrade.
 
     It then proves the copy builds and its tests pass, checks `git status` is clean, copies the upgrade prompt to the
     clipboard and opens VS Code on the folder.
@@ -96,7 +96,7 @@ $global:LASTEXITCODE = 0
 & robocopy (Join-Path $root 'templates\workspace') $Path /E /NFL /NDL /NJH /NJS /NP | Out-Null
 if ($LASTEXITCODE -ge 8) { throw "robocopy failed with exit code $LASTEXITCODE" }
 $global:LASTEXITCODE = 0
-Ok 'copied TaxApp.sln, TaxApp.Web, TaxApp.Tests, the tax-money-rules skill and the workspace settings'
+Ok 'copied TaxApp.sln, TaxApp.Web, TaxApp.Tests, security assessment debt, the tax-money-rules skill and workspace settings'
 
 Step 'Creating the git repository'
 Push-Location $Path
@@ -148,5 +148,6 @@ Workspace ready: $Path
 Next, in VS Code (see RUN-SHEET.md):
   1. Open the Copilot Chat view and pick the Upgrade agent (or type @upgrade).
   2. Paste the prompt (it is on your clipboard) and follow the confirmations.
-  3. When the agent finishes, run:  ./go.ps1 -Compare
+  3. Verify assessment and plan list the intentional security debt before execution.
+  4. When the agent finishes, run:  ./go.ps1 -Compare
 "@

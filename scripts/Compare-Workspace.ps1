@@ -8,8 +8,9 @@
 
       1. builds the solution and runs its tests,
       2. finds the web project and reports its target framework (net10.0 means upgraded; net48 means still the original),
-      3. starts the app (a net10 app with `dotnet`, a net48 app through tools/LegacyHost), and
-      4. runs the same HTTP contract (scripts/Invoke-TaxContract.ps1) that the legacy app and the prebaked
+      3. for an upgraded app, proves the vulnerable package and assessment markers were removed,
+      4. starts the app (a net10 app with `dotnet`, a net48 app through tools/LegacyHost), and
+      5. runs the same HTTP contract (scripts/Invoke-TaxContract.ps1) that the legacy app and the prebaked
          reference pass.
 
     Run it BEFORE the agent to prove the baseline, and AFTER to see what drifted.
@@ -89,6 +90,67 @@ Write-Host "    $($web.FullName.Replace($searchDir, '.'))  ->  $framework"
 $upgraded = $framework -match '^net(\d+)\.' -and [int]$Matches[1] -ge 8
 $verdicts['target framework'] = if ($framework -like 'net10*') { "$framework (upgraded to .NET 10)" } elseif ($upgraded) { "$framework (upgraded, but not .NET 10)" } else { "$framework (NOT upgraded)" }
 
+# ---------------------------------------------------- security remediation ---
+$securityOk = $true
+if ($upgraded) {
+    Step 'Security remediation'
+    $sourceFiles = @(
+        Get-ChildItem -LiteralPath $searchDir -Recurse -File -Include *.cs,*.csproj,*.cshtml,*.json,*.config,*.xml |
+            Where-Object { $_.FullName -notmatch '\\(artifacts|bin|obj|TestResults|\.git|\.github)\\' }
+    )
+    $markerPattern = 'DEMO_ONLY_NOT_A_REAL_SECRET|BinaryFormatter|DtdProcessing\.Parse|XmlUrlResolver|SELECT \* FROM Deductions.*\+|new HtmlString|File\.ReadAllText\(Path\.Combine|SHA1\.Create|new Random\(|HttpOnly\s*=\s*false|Secure\s*=\s*false|System\.Data\.SqlClient[^<\r\n]*4\.8\.5'
+    $markerHits = @(
+        foreach ($file in $sourceFiles) {
+            $content = Get-Content -LiteralPath $file.FullName -Raw
+            if ($content -match $markerPattern) {
+                [pscustomobject]@{ File = $file.FullName.Replace($searchDir, '.'); Match = $Matches[0] }
+            }
+        }
+    )
+
+    $auditOutput = & dotnet list $web.FullName package --vulnerable --include-transitive --format json 2>&1
+    $auditSucceeded = ($LASTEXITCODE -eq 0)
+    $vulnerablePackages = @()
+    if ($auditSucceeded) {
+        try {
+            $audit = ($auditOutput -join [Environment]::NewLine) | ConvertFrom-Json
+            $vulnerablePackages = @(
+                foreach ($project in @($audit.projects)) {
+                    foreach ($framework in @($project.frameworks)) {
+                        foreach ($package in @($framework.topLevelPackages) + @($framework.transitivePackages)) {
+                            if ($package -and @($package.vulnerabilities).Count -gt 0) {
+                                $package
+                            }
+                        }
+                    }
+                }
+            )
+        }
+        catch {
+            $auditSucceeded = $false
+        }
+    }
+
+    $securityOk = $auditSucceeded -and $vulnerablePackages.Count -eq 0 -and $markerHits.Count -eq 0
+    if ($securityOk) {
+        Write-Host '    no vulnerable packages or intentional assessment markers remain' -ForegroundColor Green
+        $verdicts['security remediation'] = 'OK (assessment debt removed)'
+    }
+    else {
+        if (-not $auditSucceeded) { Write-Host '    NuGet vulnerability audit did not complete' -ForegroundColor Red }
+        foreach ($package in $vulnerablePackages) {
+            Write-Host "    vulnerable package remains: $($package.id) $($package.resolvedVersion)" -ForegroundColor Red
+        }
+        foreach ($hit in $markerHits) {
+            Write-Host "    assessment marker remains in $($hit.File): $($hit.Match)" -ForegroundColor Red
+        }
+        $verdicts['security remediation'] = 'FAILED (security assessment debt remains)'
+    }
+}
+else {
+    $verdicts['security remediation'] = 'baseline: intentional debt retained until upgrade'
+}
+
 # --------------------------------------------------------------- run + contract
 $contractOk = $false
 if ($buildOk) {
@@ -122,10 +184,10 @@ else { $verdicts['http contract'] = 'not run (build failed)' }
 Write-Host ''
 Write-Host 'Result' -ForegroundColor Cyan
 foreach ($k in $verdicts.Keys) { Write-Host ('  {0,-18} {1}' -f $k, $verdicts[$k]) }
-$intact = $buildOk -and $testOk -and $contractOk
+$intact = $buildOk -and $testOk -and $contractOk -and $securityOk
 Write-Host ''
 if (-not $intact) {
-    Write-Host 'NOT PROVEN: at least one of build, tests or the HTTP contract failed.' -ForegroundColor Red
+    Write-Host 'NOT PROVEN: at least one of build, tests, security remediation or the HTTP contract failed.' -ForegroundColor Red
 }
 elseif ($framework -like 'net4*') {
     Write-Host 'BASELINE GREEN: the original app builds, passes its tests and the HTTP contract. Run the upgrade, then run this again.' -ForegroundColor Yellow

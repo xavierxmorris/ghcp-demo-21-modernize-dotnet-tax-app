@@ -7,6 +7,7 @@ Fictional demo of upgrading a .NET Framework 4.8 MVC app to .NET 10. Illustrativ
 ## Layout
 
 - `legacy/` the before: ASP.NET MVC 5, .NET Framework 4.8, SDK-style projects, xUnit. Deliberately legacy.
+- `legacy/TaxApp.Web/Helpers/SecurityAssessmentSamples.cs` deliberately insecure, private and unrouted assessment debt.
 - `modern/` the prebaked after: ASP.NET Core MVC, .NET 10, xUnit and in-memory HTTP tests.
 - `tools/LegacyHost/` dev-only host that runs the legacy System.Web site without IIS.
 - `scripts/` the contract, compare, workspace, drift and VS Code checks. `go.ps1` runs them.
@@ -31,10 +32,13 @@ dotnet test modern/TaxApp.sln
 - Comments explain why, not what. Cite the reason when code exists for a legacy quirk.
 - Tests read the shared golden master instead of hard-coding expectations.
 - VS Code tasks are `"type": "process"` so `scripts/Test-VsCodeConfig.ps1` can execute them exactly as written.
+- Assessment samples must stay private, synthetic and uncoupled from controllers, routes, tests and startup code.
 
 ## Non-negotiable
 
 - Never edit expected values in the golden master or loosen the HTTP contract to make a change pass.
 - Never present `modern/` as the Copilot upgrade agent's output.
 - Do not modernize `legacy/`; it is the demo input. C# 7.3 in `.cs`, C# 5 in `.cshtml`.
+- The intentional security findings are the exception the upgrade agent is expected to identify, plan and remediate.
+- Never add real credentials or a caller/route for `SecurityAssessmentSamples`; the upgrade must remove or replace it safely.
 - Report real command output. Do not claim a check passed unless you ran it.

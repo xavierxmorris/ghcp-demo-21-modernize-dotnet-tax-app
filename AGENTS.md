@@ -39,6 +39,8 @@ as written. Keep tasks as `"type": "process"` with `command` and `args` so that 
 3. **`legacy/` is deliberately legacy.** Do not modernize it, add nullable annotations, switch it to `System.Text.Json`, or use
    syntax newer than C# 7.3 in `.cs` files and C# 5 in `.cshtml` files (the .NET Framework view compiler is C# 5).
    Changing `legacy/` changes what the demo shows the agent. If you must, re-run `./go.ps1 -Check`.
+   The security findings in `TaxApp.Web/Helpers/SecurityAssessmentSamples.cs` and `Web.config` are intentional assessment
+   debt for the agent to remediate; keep their methods private and unrouted, and use no real credentials or data.
 4. **`modern/` must keep passing the same contract as `legacy/`.** If you change observable behaviour in one, change both and the
    vectors deliberately, and explain it in your summary.
 5. **Never present `modern/` as the upgrade agent's output.** It is a hand-built reference. Keep the README "Honesty notes" true.

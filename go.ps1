@@ -104,7 +104,7 @@ Manual walkthrough (the full version, with what to say, is RUN-SHEET.md)
  2. ./go.ps1 -Reset                  # disposable workspace, prompt on the clipboard, VS Code opens
  3. VS Code > Copilot Chat > Agent picker > Upgrade (or type @upgrade) > pick a model > paste the prompt
  4. Confirmations: .NET 10, Automatic or Guided, branch upgrade-to-net10, commit after each task
- 5. Assessment  -> open assessment.md   (under .github/upgrades/<scenario>)
+ 5. Assessment  -> open assessment.md   (security findings plus .NET blockers, under .github/upgrades/<scenario>)
  6. Options     -> All-at-once, In-place rewrite
  7. Plan, tasks -> open plan.md and tasks.md; edit them if you like; the tasks run
  8. Keep / Undo the changes in the editor when asked
@@ -280,7 +280,13 @@ Measure-Step '2. Golden master matches the independent reference calculation' {
     @{ Status = 'pass'; Detail = "$output" }
 }
 
-Measure-Step '3. VS Code configuration: every task executes, both launch configurations start' {
+Measure-Step '3. Security assessment fixtures: compiled into the legacy web app and safely unrouted' {
+    $exit = Invoke-Script 'Test-SecurityAssessmentFixtures.ps1'
+    if ($exit -ne 0) { throw 'Test-SecurityAssessmentFixtures.ps1 reported failures (see above)' }
+    @{ Status = 'pass'; Detail = '10 classic signals; vulnerable package detected; all samples private and unrouted' }
+}
+
+Measure-Step '4. VS Code configuration: every task executes, both launch configurations start' {
     $exit = Invoke-Script 'Test-VsCodeConfig.ps1'
     if ($exit -ne 0) { throw 'Test-VsCodeConfig.ps1 reported failures (see above)' }
     $legacyTests = Get-TestLine 'legacy-test'; $modernTests = Get-TestLine 'modern-test'
@@ -289,17 +295,17 @@ Measure-Step '3. VS Code configuration: every task executes, both launch configu
     @{ Status = 'pass'; Detail = "legacy: $legacyTests | modern: $modernTests" }
 }
 
-Measure-Step '4. HTTP contract: legacy app (.NET Framework 4.8, through tools/LegacyHost)' {
+Measure-Step '5. HTTP contract: legacy app (.NET Framework 4.8, through tools/LegacyHost)' {
     $site = Start-LegacySite
     try { Invoke-ContractFor 'legacy' $site } finally { Stop-Site $site }
 }
 
-Measure-Step '5. HTTP contract: prebaked modern reference (.NET 10)' {
+Measure-Step '6. HTTP contract: prebaked modern reference (.NET 10)' {
     $site = Start-ModernSite
     try { Invoke-ContractFor 'modern' $site } finally { Stop-Site $site }
 }
 
-Measure-Step '6. Disposable workspace: -Reset, then -Compare as a baseline' {
+Measure-Step '7. Disposable workspace: -Reset, then -Compare as a baseline' {
     $workspace = Join-Path ([System.IO.Path]::GetTempPath()) ('taxapp-check-' + [guid]::NewGuid().ToString('N').Substring(0, 8))
     try {
         $exit = Invoke-Script 'New-DemoWorkspace.ps1' @('-Path', $workspace, '-NoOpen', '-NoClipboard')
@@ -312,7 +318,7 @@ Measure-Step '6. Disposable workspace: -Reset, then -Compare as a baseline' {
     finally { if (Test-Path $workspace) { Remove-Item -LiteralPath $workspace -Recurse -Force -ErrorAction SilentlyContinue } }
 }
 
-Measure-Step '7. -Compare on the .NET 10 reference, and the checks can fail (seeded regressions)' {
+Measure-Step '8. -Compare on the .NET 10 reference, and the checks can fail (seeded regressions)' {
     $exit = Invoke-Script 'Compare-Workspace.ps1' @('-Target', 'modern/TaxApp.sln')
     if ($exit -ne 0) { throw 'Compare-Workspace.ps1 failed on the modern reference' }
     Ok 'the .NET 10 reference is reported as upgraded and intact'
@@ -322,7 +328,7 @@ Measure-Step '7. -Compare on the .NET 10 reference, and the checks can fail (see
     @{ Status = 'pass'; Detail = 'reference intact; seeded regressions detected' }
 }
 
-Measure-Step '8. Documentation links' {
+Measure-Step '9. Documentation links' {
     $exit = Invoke-Script 'Test-DocLinks.ps1'
     if ($exit -ne 0) { throw 'broken documentation links' }
     @{ Status = 'pass'; Detail = '' }

@@ -15,7 +15,7 @@ model you like. Then paste:
 
 <!-- prompt:upgrade -->
 ```text
-Upgrade this solution from .NET Framework 4.8 to .NET 10 (LTS). Keep the behaviour exactly the same: every URL, form field name and JSON property name must stay the same, money must stay decimal with the existing rounding, and the existing tests must still pass on .NET 10. Follow .github/skills/tax-money-rules. Work on a new branch and commit after each task.
+Upgrade this solution from .NET Framework 4.8 to .NET 10 (LTS). Keep the behaviour exactly the same: every URL, form field name and JSON property name must stay the same, money must stay decimal with the existing rounding, and the existing tests must still pass on .NET 10. Treat the private samples in TaxApp.Web/Helpers/SecurityAssessmentSamples.cs, the System.Data.SqlClient 4.8.5 dependency and the fake SecurityDemoPassword setting as intentional legacy security debt: inventory each finding during assessment, include remediation in the plan, and remove or replace the unsafe code during execution. Never call the samples, add a route, or put a real credential in the project. Follow .github/skills/tax-money-rules. Work on a new branch and commit after each task.
 ```
 
 Being this explicit is the point: the agent plans from your words, and a Tax App has things that must not drift.
@@ -42,7 +42,14 @@ The agent collects these before it starts (documented: target framework, Git bra
 | Ready to run the tasks | `start the upgrade` |
 
 Open `assessment.md`, `plan.md` and `tasks.md` under `.github/upgrades/` (the scenario folder name varies) and edit them if you
-want; they are plain Markdown.
+want; they are plain Markdown. The assessment should contain the vulnerable `System.Data.SqlClient` dependency and the private
+`SecurityAssessmentSamples` findings. The plan should have explicit tasks to remove or replace each unsafe pattern, and execution
+should complete them without exposing a route or changing the HTTP contract.
+
+The expected ten assessment signals are: vulnerable `System.Data.SqlClient` 4.8.5, hard-coded credential, unsafe
+deserialization, XXE-capable XML parsing, SQL injection, reflected XSS, path traversal, SHA-1 hashing, weak token randomness and
+insecure cookie flags. Exact wording and severity vary by model; the important check is that assessment recognises the debt and
+planning/execution remediates it.
 
 ## 4. Optional: a custom upgrade instruction (the video's "skills" beat)
 
@@ -76,8 +83,9 @@ Then verify it yourself, outside the agent:
 ./go.ps1 -Compare
 ```
 
-That builds and tests the upgraded workspace, starts the upgraded app and runs the same HTTP contract that the legacy app and
-the prebaked reference pass. A red check means behaviour drifted.
+That builds and tests the upgraded workspace, checks that the vulnerable package and assessment markers are gone, starts the
+upgraded app and runs the same HTTP contract that the legacy app and the prebaked reference pass. A red security or behaviour
+check means the execution stage is incomplete.
 
 ## 6. If the agent stalls or the network is slow
 

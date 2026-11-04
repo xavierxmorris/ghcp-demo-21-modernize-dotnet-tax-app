@@ -48,7 +48,7 @@ A debt register for the presenter (the answer key, kept out of the workspace the
 ./go.ps1 -Run Legacy   # the BEFORE: http://localhost:8081 (no IIS, no admin rights)
 ./go.ps1 -Reset        # disposable workspace; the upgrade prompt is on your clipboard; VS Code opens
 #   ... run the Upgrade agent in VS Code: see RUN-SHEET.md ...
-./go.ps1 -Compare      # build, tests and the HTTP contract against the upgraded app
+./go.ps1 -Compare      # build, tests, security remediation and the HTTP contract
 ./go.ps1 -Run Modern   # the prebaked .NET 10 reference (NOT agent output)
 ```
 
@@ -67,6 +67,7 @@ VS Code asks whether you trust the folder (Workspace Trust). Tasks and the debug
 | Do | Result |
 | --- | --- |
 | **Terminal > Run Task…** `build: all`, `test: all` | Builds and tests both apps |
+| **Terminal > Run Task…** `security: verify assessment samples` | Verifies ten synthetic vulnerability signals, their private/unrouted state and the NuGet audit result |
 | `legacy: run site` / `modern: run site` | Starts the site (background task); `demo: open … in browser` opens it |
 | **F5** > *Modern Tax App (.NET 10)* | Runs the modern app under the debugger and opens the browser |
 | **F5** > *Legacy Tax App … experimental* | Runs the .NET Framework app under the `clr` debugger through the legacy host (see [honesty notes](#honesty-notes)) |
@@ -88,7 +89,7 @@ configuration's program and checks its `serverReadyAction` pattern against the r
 | 4:20 | Upgrade options (all-at-once, in-place rewrite) | UI step |
 | 5:11 | `plan.md` and `tasks.md` | UI step |
 | 6:54 | Dashboard, activity monitor | UI step (rehearse) |
-| 11:21 | Done: business functionality intact | `./go.ps1 -Compare` |
+| 11:21 | Done: functionality intact and security debt removed | `./go.ps1 -Compare` |
 | 12:13 | Everywhere, and the Modernize CLI at portfolio scale | [PROMPTS.md](PROMPTS.md#7-portfolio-scale-the-modernize-cli-video-last-beat) |
 
 The presenter's one-pager with what to say and click is [RUN-SHEET.md](RUN-SHEET.md).
@@ -97,9 +98,22 @@ The presenter's one-pager with what to say and click is [RUN-SHEET.md](RUN-SHEET
 
 | Kind | Meaning | Examples |
 | --- | --- | --- |
-| **Machine-verified** | A script ran it; `./go.ps1 -Check` repeats it | Both apps build and pass their tests; both apps pass the HTTP contract; every VS Code task and launch program runs; the workspace script; `-Compare`; the seeded-regression self-test; the golden master matches its independent reference; documentation links. A recorded run is in [docs/evidence/verification.md](docs/evidence/verification.md) |
+| **Machine-verified** | A script ran it; `./go.ps1 -Check` repeats it | Both apps build and pass their tests; both apps pass the HTTP contract; every VS Code task and launch program runs; the workspace script; the ten security samples, private visibility and NuGet audit; `-Compare`; the seeded-regression self-test; the golden master matches its independent reference; documentation links. A recorded run is in [docs/evidence/verification.md](docs/evidence/verification.md) |
 | **Prebaked reference** | Written in advance by this repository's author with GitHub Copilot CLI | [`modern/`](modern/TaxApp.Web) is the .NET 10 Tax App. It is the **fallback and the yardstick**. It is **not** the upgrade agent's output and must never be presented as such |
 | **UI step (not machine-verified)** | Needs a human in VS Code | Picking the agent, the confirmation questions, reading `assessment.md`, `plan.md` and `tasks.md`, Keep/Undo, the dashboard, F5 under the debugger |
+
+## Intentional security debt for the assessment
+
+The legacy web project deliberately contains ten classic signals for the agent to find and remediate during a real **assessment
+→ plan → execute** run: a NuGet-advisory package, unsafe deserialization, XXE-capable XML, SQL injection, reflected XSS, path
+traversal, weak password hashing, predictable token randomness, insecure cookie flags and a fake hard-coded password. The code
+uses request-shaped inputs so the assessment can understand each source-to-sink relationship.
+
+`SecurityAssessmentSamples` is internal, every method is private, no controller or other app code calls it, and the credential is
+obviously synthetic. The samples are compiled into `TaxApp.Web` because the security debt must be part of the app the agent is
+asked to upgrade; they are not an endpoint. Run `./scripts/Test-SecurityAssessmentFixtures.ps1` to verify all ten signals,
+the absence of callers, and the NuGet vulnerability result. Never add real credentials or routes to these samples, and never
+deploy the legacy demo as a production application.
 
 ## Repository map
 
@@ -110,7 +124,7 @@ The presenter's one-pager with what to say and click is [RUN-SHEET.md](RUN-SHEET
 | [`modern/`](modern/TaxApp.sln) | The **prebaked after**: ASP.NET Core MVC on .NET 10, with xUnit and in-memory HTTP tests |
 | [`tools/LegacyHost/`](tools/LegacyHost/LegacyHost.csproj) | Dev-only host that runs the real ASP.NET (System.Web) pipeline in-process so the legacy site runs without IIS Express |
 | `legacy/TaxApp.Tests/Golden/tax-vectors.json` | The golden master, shared by both test projects and the HTTP contract |
-| [`scripts/`](scripts) | `Invoke-TaxContract.ps1`, `Compare-Workspace.ps1`, `New-DemoWorkspace.ps1`, `Invoke-DriftDemo.ps1`, `Test-VsCodeConfig.ps1`, `Test-DocLinks.ps1`, `golden/new_tax_vectors.py` |
+| [`scripts/`](scripts) | `Invoke-TaxContract.ps1`, `Compare-Workspace.ps1`, `New-DemoWorkspace.ps1`, `Invoke-DriftDemo.ps1`, `Test-SecurityAssessmentFixtures.ps1`, `Test-VsCodeConfig.ps1`, `Test-DocLinks.ps1`, `golden/new_tax_vectors.py` |
 | [`.vscode/`](.vscode/tasks.json) | Tasks, launch configurations, extension recommendations |
 | [`.github/`](.github/skills/tax-money-rules/SKILL.md) | The demo skill, Copilot instructions and the CI workflow |
 | [`docs/`](docs/TAX-RULES.md) | Tax rules and sources, the legacy debt register, evidence |
@@ -147,7 +161,7 @@ The presenter's one-pager with what to say and click is [RUN-SHEET.md](RUN-SHEET
   retrieved 2026-10-26.
 - **Product names moved after the video.** The video's *Modernize .NET* agent comes from an extension that is now deprecated in favour of
   **GitHub Copilot upgrade**. The run sheet explains the mapping and cites where each claim was read.
-- **Not verified here:** the agent run itself, whether the agent loads `.github/skills` unprompted (the prompt names the skill as a
+- **Not verified here:** the agent run itself, its exact vulnerability wording or severity choices, whether the agent loads `.github/skills` unprompted (the prompt names the skill as a
   safety net), whether a dashboard opens in your VS Code build, and the debugger attaching in the *experimental* legacy launch
   configuration.
 - **No time-saved or accuracy claims.** Record your own rehearsal timings.
